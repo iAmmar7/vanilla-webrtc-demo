@@ -3,6 +3,8 @@ const cameraSelect = document.querySelector('select#cameraSource');
 const microphoneSelect = document.querySelector('select#microphoneSource');
 const speakerSelect = document.querySelector('select#speakerSource');
 
+const constraints = { audio: true, video: true };
+
 async function init() {
   console.log('Init application');
 
@@ -13,19 +15,30 @@ async function init() {
     });
   }
 
+  // const microphoneIds = (await getConnectedDevices('audioinput'))
+  //   .filter((device) => device.deviceId !== 'default')
+  //   .map((device) => device.deviceId);
+
   // If you have a `deviceId` from mediaDevices.enumerateDevices(), you can use it to request a specific device
   const audioSource = microphoneSelect.value;
   const videoSource = cameraSelect.value;
-  const constraints = {
-    audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-    video: { deviceId: videoSource ? { exact: videoSource } : undefined, facingMode: 'user' },
-  };
+  // constraints.audio = { deviceId: microphoneIds };
+  constraints.audio = audioSource ? { deviceId: audioSource } : true;
+  constraints.video = videoSource ? { deviceId: videoSource } : true;
 
   // Get permissions
   try {
+    console.log('Constraints', constraints);
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     window.stream = stream; // make stream available to console
     videoElement.srcObject = stream;
+
+    stream.getTracks().forEach((track) => {
+      track.addEventListener('ended', (someTrack) => {
+        console.log('someTrack has ended', someTrack);
+      });
+    });
+
     console.log('Got MediaStream:', stream);
   } catch (error) {
     console.error('Error accessing media devices.', error);
@@ -124,6 +137,7 @@ function updateSpeakerList(speakers) {
 // Fetch an array of devices of a certain type
 async function getConnectedDevices(type) {
   const devices = await navigator.mediaDevices.enumerateDevices();
+  if (!type) return devices;
   return devices.filter((device) => device.kind === type);
 }
 
@@ -142,24 +156,115 @@ async function changeSpeaker() {
   }
 }
 
+const _deviceInfoToMap = (devices) => {
+  const map = new Map();
+
+  devices.forEach((deviceInfo) => {
+    if (deviceInfo.deviceId) {
+      map.set(deviceInfo.deviceId, deviceInfo);
+    }
+  });
+
+  return map;
+};
+
+const _getDeviceListDiff = (oldDevices, newDevices) => {
+  const current = _deviceInfoToMap(oldDevices);
+  const removals = _deviceInfoToMap(oldDevices);
+  const updates = [];
+
+  const additions = newDevices.filter((newDevice) => {
+    const id = newDevice.deviceId;
+    const oldDevice = current.get(id);
+
+    if (oldDevice) {
+      removals.delete(id);
+
+      if (newDevice.label !== oldDevice.label) {
+        updates.push(newDevice);
+      }
+    }
+
+    return oldDevice === undefined;
+  });
+
+  return {
+    updated: updates.map((value) => {
+      return {
+        type: 'updated',
+        payload: value,
+      };
+    }),
+
+    // Removed devices
+    removed: Array.from(removals, ([_, value]) => value).map((value) => {
+      return {
+        type: 'removed',
+        payload: value,
+      };
+    }),
+
+    added: additions.map((value) => {
+      return {
+        type: 'added',
+        payload: value,
+      };
+    }),
+  };
+};
+
 // Listen for changes to media devices and update the list accordingly
-navigator.mediaDevices.addEventListener('devicechange', async (event) => {
-  console.log('devicechange event trigger', event);
-  const newCameraList = await getConnectedDevices('videoinput');
-  console.log('newCameraList', newCameraList);
-  updateCameraList(newCameraList);
+const createDeviceWatcher = async () => {
+  const currentDevices = await getConnectedDevices();
+  let knownDevices = currentDevices.filter((dev) => dev.deviceId !== 'default');
 
-  const newMicrophoneInList = await getConnectedDevices('audioinput');
-  console.log('newMicrophoneInList', newMicrophoneInList);
-  updateMicrophoneList(newMicrophoneInList);
+  const deviceChangeHandler = async (event) => {
+    console.log('devicechange event trigger', event);
 
-  const newMicrophoneOutList = await getConnectedDevices('audiooutput');
-  console.log('newMicrophoneOutList', newMicrophoneOutList);
-  updateSpeakerList(newMicrophoneOutList);
-});
+    const currentDevices = await getConnectedDevices();
+    const oldDevices = knownDevices;
+    const newDevices = currentDevices.filter((dev) => dev.deviceId !== 'default');
+
+    knownDevices = newDevices;
+
+    const changes = _getDeviceListDiff(oldDevices, newDevices);
+    const hasAddedDevices = changes.added.length > 0;
+    const hasRemovedDevices = changes.removed.length > 0;
+    const hasUpdatedDevices = changes.updated.length > 0;
+
+    if (hasAddedDevices || hasRemovedDevices || hasUpdatedDevices) {
+      console.log('A device has changed', changes);
+    }
+    if (hasAddedDevices) {
+      console.log('A device has been added', changes.added);
+
+      // const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+    }
+    if (hasRemovedDevices) {
+      console.log('A device has been removed', changes.removed);
+    }
+    if (hasUpdatedDevices) {
+      console.log('A device has been updated', changes.updated);
+    }
+
+    const newCameraList = await getConnectedDevices('videoinput');
+    console.log('newCameraList', newCameraList);
+    updateCameraList(newCameraList);
+
+    const newMicrophoneInList = await getConnectedDevices('audioinput');
+    console.log('newMicrophoneInList', newMicrophoneInList);
+    updateMicrophoneList(newMicrophoneInList);
+
+    const newMicrophoneOutList = await getConnectedDevices('audiooutput');
+    console.log('newMicrophoneOutList', newMicrophoneOutList);
+    updateSpeakerList(newMicrophoneOutList);
+  };
+
+  navigator.mediaDevices.addEventListener('devicechange', deviceChangeHandler);
+};
 
 cameraSelect.onchange = init;
 microphoneSelect.onchange = init;
 speakerSelect.onchange = changeSpeaker;
 
-init();
+init().then(async () => await createDeviceWatcher());
