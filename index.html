@@ -29,6 +29,23 @@
             <label for="speakers">Speakers:</label>
             <select name="speakers" id="speakerSource" class="border rounded-md p-1 max-w-[12rem] text-sm"></select>
           </div>
+          <div class="my-4 flex items-center gap-x-2">
+            <button
+              id="shareScreenBtn"
+              class="border px-2 py-1 rounded-md bg-green-500 text-white cursor-pointer"
+              onclick="shareScreen()"
+            >
+              Start screen share
+            </button>
+            <div class="inline-flex flex-col">
+              <select id="displayScreen" class="border rounded-md p-1 max-w-[12rem] text-sm">
+                <option value="default" selected>Default options</option>
+                <option value="browser">Share a browser tab</option>
+                <option value="window">Share a window</option>
+                <option value="monitor">Share an entire screen</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </main>

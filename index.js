@@ -2,6 +2,8 @@ const videoElement = document.querySelector('#videoElement');
 const cameraSelect = document.querySelector('select#cameraSource');
 const microphoneSelect = document.querySelector('select#microphoneSource');
 const speakerSelect = document.querySelector('select#speakerSource');
+const screenSelect = document.querySelector('select#displayScreen');
+const shareScreenButton = document.querySelector('button#shareScreenBtn');
 
 const constraints = { audio: true, video: true };
 
@@ -134,13 +136,6 @@ function updateSpeakerList(speakers) {
     .forEach((speakerOption) => speakerSelect.appendChild(speakerOption));
 }
 
-// Fetch an array of devices of a certain type
-async function getConnectedDevices(type) {
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  if (!type) return devices;
-  return devices.filter((device) => device.kind === type);
-}
-
 // Change speaker destination
 async function changeSpeaker() {
   const speakerId = speakerSelect.value;
@@ -154,6 +149,48 @@ async function changeSpeaker() {
       console.error('Speaker selection error', error);
     }
   }
+}
+
+async function shareScreen() {
+  try {
+    const displayScreen = screenSelect.options[screenSelect.selectedIndex].value;
+    const options = { audio: true, video: displayScreen !== 'default' ? { displaySurface: displayScreen } : true };
+
+    const currentStream = videoElement.srcObject;
+    const stream = await navigator.mediaDevices.getDisplayMedia(options);
+
+    shareScreenButton.classList.add('bg-red-500');
+    shareScreenButton.innerHTML = 'Stop screen share';
+    shareScreenButton.onclick = () => stopScreenShare(stream, currentStream);
+    screenSelect.disabled = true;
+    videoElement.srcObject = stream;
+
+    stream.getVideoTracks()[0].addEventListener('ended', () => {
+      onScreenShareStop(currentStream);
+    });
+  } catch (error) {
+    console.log('Share Screen error', error);
+  }
+}
+
+async function stopScreenShare(stream, fallbackStream) {
+  stream.getTracks().forEach((track) => track.stop());
+  onScreenShareStop(fallbackStream);
+}
+
+function onScreenShareStop(fallbackStream) {
+  shareScreenButton.classList.remove('bg-red-500');
+  shareScreenButton.innerHTML = 'Start screen share';
+  shareScreenButton.onclick = shareScreen;
+  screenSelect.disabled = false;
+  if (fallbackStream) videoElement.srcObject = fallbackStream;
+}
+
+// Fetch an array of devices of a certain type
+async function getConnectedDevices(type) {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  if (!type) return devices;
+  return devices.filter((device) => device.kind === type);
 }
 
 const _deviceInfoToMap = (devices) => {
@@ -237,8 +274,6 @@ const createDeviceWatcher = async () => {
     }
     if (hasAddedDevices) {
       console.log('A device has been added', changes.added);
-
-      // const newStream = await navigator.mediaDevices.getUserMedia(constraints);
     }
     if (hasRemovedDevices) {
       console.log('A device has been removed', changes.removed);
