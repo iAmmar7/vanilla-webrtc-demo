@@ -9,9 +9,44 @@
   </head>
   <body>
     <main class="w-full md:w-3/4 border mr-auto ml-auto py-2 px-2 md:px-0">
-      <h1 class="text-3xl text-center">WebRTC Media Devices</h1>
+      <h1 class="text-3xl text-center">WebRTC Peer Connection</h1>
       <div class="flex justify-center my-2">
-        <div class="w-[40rem]">Demo</div>
+        <div class="w-[40rem]">
+          <video autoplay playsinline id="videoElement" class="mb-2 rounded-md md:h-[480px]"></video>
+          <div class="inline-flex flex-col mr-1">
+            <label for="cameras">Camera:</label>
+            <select name="cameras" id="cameraSource" class="border rounded-md p-1 max-w-[12rem] text-sm"></select>
+          </div>
+          <div class="inline-flex flex-col ml-1">
+            <label for="microphones">Microphone:</label>
+            <select
+              name="microphones"
+              id="microphoneSource"
+              class="border rounded-md p-1 max-w-[12rem] text-sm"
+            ></select>
+          </div>
+          <div class="inline-flex flex-col ml-1">
+            <label for="speakers">Speakers:</label>
+            <select name="speakers" id="speakerSource" class="border rounded-md p-1 max-w-[12rem] text-sm"></select>
+          </div>
+          <div class="my-4 flex items-center gap-x-2">
+            <button
+              id="shareScreenBtn"
+              class="border px-2 py-1 rounded-md bg-green-500 text-white cursor-pointer"
+              onclick="shareScreen()"
+            >
+              Start screen share
+            </button>
+            <div class="inline-flex flex-col">
+              <select id="displayScreen" class="border rounded-md p-1 max-w-[12rem] text-sm">
+                <option value="default" selected>Default options</option>
+                <option value="browser">Share a browser tab</option>
+                <option value="window">Share a window</option>
+                <option value="monitor">Share an entire screen</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
     <script src="./index.js"></script>
