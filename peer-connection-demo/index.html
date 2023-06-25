@@ -9,9 +9,46 @@
   </head>
   <body>
     <main class="w-full md:w-3/4 border mr-auto ml-auto py-2 px-2 md:px-0">
-      <h1 class="text-3xl text-center">WebRTC Media Devices</h1>
-      <div class="flex justify-center my-2">
-        <div class="w-[40rem]">Demo</div>
+      <h1 class="text-3xl text-center">WebRTC Peer Connection</h1>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <video
+          autoplay
+          playsinline
+          muted
+          id="localVideo"
+          class="border mb-2 rounded-md md:w-[400px] md:h-[400px] bg-black"
+        ></video>
+        <video
+          autoplay
+          playsinline
+          id="remoteVideo"
+          class="border mb-2 rounded-md md:w-[400px] md:h-[400px] bg-black"
+        ></video>
+      </div>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <button
+          id="startLocalStream"
+          class="border px-2 py-1 rounded-md bg-green-500 disabled:bg-green-300 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startLocalStream()"
+        >
+          Start local stream
+        </button>
+        <button
+          id="startPeerConnection"
+          class="border px-2 py-1 rounded-md bg-green-500 disabled:bg-green-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startPeerConnection()"
+          disabled
+        >
+          Start peer connection
+        </button>
+        <button
+          id="hangupCall"
+          class="border px-2 py-1 rounded-md bg-red-500 disabled:bg-red-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="hangupCall()"
+          disabled
+        >
+          Hangup the call
+        </button>
       </div>
     </main>
     <script src="./index.js"></script>
