@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Demo - RTCDataChannel</title>
+  </head>
+  <body>
+    <main class="w-full md:w-3/4 border mr-auto ml-auto py-2 px-2 md:px-0">
+      <h1 class="text-3xl text-center">WebRTC Peer Connection Data Channel</h1>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <textarea
+          id="localText"
+          class="border mb-2 p-2 rounded-md md:w-[300px] md:h-[200px] disabled:cursor-not-allowed"
+          placeholder="Press start, write a text and hit send"
+          disabled
+        ></textarea>
+        <textarea
+          id="remoteText"
+          class="border mb-2 p-2 rounded-md md:w-[300px] md:h-[200px] disabled:cursor-not-allowed"
+          disabled
+        ></textarea>
+      </div>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <button
+          id="start"
+          class="border px-2 py-1 rounded-md bg-green-500 disabled:bg-green-300 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startLocalStream()"
+        >
+          Start
+        </button>
+        <button
+          id="send"
+          class="border px-2 py-1 rounded-md bg-green-500 disabled:bg-green-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startPeerConnection()"
+          disabled
+        >
+          Send
+        </button>
+        <button
+          id="stop"
+          class="border px-2 py-1 rounded-md bg-red-500 disabled:bg-red-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="hangupCall()"
+          disabled
+        >
+          Stop
+        </button>
+      </div>
+    </main>
+    <script src="./index.js"></script>
+  </body>
+</html>
