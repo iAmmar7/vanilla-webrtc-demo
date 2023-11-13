@@ -10,7 +10,7 @@ const io = new Server(server);
 
 app.use(express.static(join(__dirname, 'client')));
 
-app.get('/', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(join(__dirname, '/client/index.html'));
 });
 

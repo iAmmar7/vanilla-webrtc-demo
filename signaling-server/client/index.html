@@ -2,13 +2,85 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Signaling Server WebRTC Demo</title>
   </head>
   <body>
-    <h1>Realtime communication with WebRTC</h1>
+    <div id="promptBox" class="p-4 mx-auto max-w-md transition duration-500 ease-in-out transform">
+      <h1 class="text-2xl text-center">Join a video room</h1>
+      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-4">
+          <label for="room" class="block text-gray-700 text-sm font-bold mb-2">Enter room name:</label>
+          <input
+            type="text"
+            id="roomName"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder="Office room"
+            oninput="removeSpaces(event)"
+            required
+          />
+        </div>
+        <div class="flex items-center justify-between">
+          <button
+            type="submit"
+            class="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded focus:outline-none focus:shadow-outline"
+            id="submitBtn"
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <main
+      class="shadow-md w-full md:w-3/4 border mt-4 mr-auto ml-auto py-2 px-2 md:px-0 transition duration-500 ease-in-out transform"
+    >
+      <h1 class="text-3xl text-center">WebRTC Room <span id="roomName" class="font-bold"></span></h1>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <video
+          autoplay
+          playsinline
+          muted
+          id="localVideo"
+          class="border mb-2 rounded-md md:w-[300px] md:h-[300px] bg-black"
+        ></video>
+        <video
+          autoplay
+          playsinline
+          id="remoteVideo"
+          class="border mb-2 rounded-md md:w-[300px] md:h-[300px] bg-black"
+        ></video>
+      </div>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <button
+          id="startLocalStream"
+          class="border px-2 py-1 rounded-md bg-green-500 hover:bg-green-700 disabled:bg-green-300 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startLocalStream()"
+        >
+          Start local stream
+        </button>
+        <button
+          id="startPeerConnection"
+          class="border px-2 py-1 rounded-md bg-green-500 hover:bg-green-700 disabled:bg-green-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="startPeerConnection()"
+          disabled
+        >
+          Start peer connection
+        </button>
+        <button
+          id="hangupCall"
+          class="border px-2 py-1 rounded-md bg-red-500 hover:bg-red-700 disabled:bg-red-400 text-white cursor-pointer disabled:cursor-not-allowed"
+          onclick="hangupCall()"
+          disabled
+        >
+          Hangup the call
+        </button>
+      </div>
+    </main>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/main.js"></script>
+    <script src="js/index.js"></script>
   </body>
 </html>

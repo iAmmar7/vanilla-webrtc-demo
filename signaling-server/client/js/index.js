@@ -1,10 +1,39 @@
-let isInitiator;
+const form = document.querySelector('form');
+const input = document.querySelector('input');
+const main = document.querySelector('main');
+const promptBox = document.getElementById('promptBox');
 
-window.room = prompt('Enter room name:');
+const path = window.location.pathname.substring(1);
+
+let room;
+
+if (path.length) {
+  promptBox.classList.add('hidden');
+  room = path;
+  document.querySelector('span#roomName').textContent = `"${room}"`;
+} else {
+  main.classList.add('hidden');
+}
+
+form.addEventListener('submit', function (event) {
+  event.preventDefault();
+  handleSubmit();
+});
+
+function handleSubmit() {
+  room = input.value;
+  window.location.pathname = room;
+}
+
+function removeSpaces() {
+  input.value = input.value.replace(/\s/g, '');
+}
 
 const socket = io.connect();
 
-if (room !== '') {
+let isInitiator;
+
+if (room && room !== '') {
   console.log('Asking to join room ' + room);
   socket.emit('create-or-join', room);
 }
