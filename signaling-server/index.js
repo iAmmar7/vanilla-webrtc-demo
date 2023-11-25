@@ -22,17 +22,11 @@ io.on('connection', function (socket) {
     socket.emit('log', array);
   }
 
-  socket.on('message', function (message) {
-    log('Client said: ', message);
-    // for a real app, would be room-only (not broadcast)
-    socket.broadcast.emit('message', message);
-  });
-
   socket.on('create-or-join', function (room) {
     log('Received request to create or join room ' + room);
 
-    const clientsInRoom = io.sockets.adapter.rooms[room];
-    const numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
+    const clientsInRoom = io.sockets.adapter.rooms.get(room);
+    const numClients = clientsInRoom?.size || 0;
 
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
 
@@ -50,6 +44,16 @@ io.on('connection', function (socket) {
       // max two clients
       socket.emit('full', room);
     }
+  });
+
+  socket.on('message', function (data) {
+    const room = data.room;
+    const message = data.message;
+
+    log('Client said (' + room + '): ', message);
+
+    // Emit the message only to clients in the specified room, excluding the sender
+    socket.to(room).emit('message', { room, message });
   });
 
   socket.on('ipaddr', function () {
