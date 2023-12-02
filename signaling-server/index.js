@@ -8,6 +8,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+const USER_LIMIT = 5;
+
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, 'client')));
 
@@ -20,10 +22,6 @@ app.get('/room/*', (req, res) => {
 });
 
 io.on('connection', function (socket) {
-  // Send current rooms to the newly connected client
-  const rooms = io.sockets.adapter.rooms;
-  socket.emit('rooms', rooms);
-
   // convenience function to log server messages on the client
   function log() {
     const array = [];
@@ -31,38 +29,52 @@ io.on('connection', function (socket) {
     socket.emit('log', array);
   }
 
+  // Send current rooms to the newly connected client
+  const rooms = io.sockets.adapter.rooms;
+  socket.emit('rooms', rooms);
+
   socket.on('create-or-join', function (room) {
     log('Received request to create or join room ' + room);
 
     const clientsInRoom = io.sockets.adapter.rooms.get(room);
     const numClients = clientsInRoom?.size || 0;
 
-    log('Room ' + room + ' now has ' + numClients + ' client(s)');
+    log('Members in room', numClients);
 
     if (numClients === 0) {
       socket.join(room);
-      log('Client ID ' + socket.id + ' created room ' + room);
       socket.emit('created', room, socket.id);
-    } else if (numClients === 1) {
-      log('Client ID ' + socket.id + ' joined room ' + room);
-      io.sockets.in(room).emit('join', room);
+
+      log('Room created:', room);
+    } else if (numClients <= USER_LIMIT) {
       socket.join(room);
       socket.emit('joined', room, socket.id);
+
+      // Emit to all room members expect sender
       io.sockets.in(room).emit('ready');
+      log('Room joined:', room);
     } else {
       // max two clients
       socket.emit('full', room);
     }
   });
 
-  socket.on('message', function (data) {
-    const room = data.room;
-    const message = data.message;
+  socket.on('offer', function (data) {
+    log('Received an offer', data);
+    const { offer, room } = data;
+    socket.broadcast.to(room).emit('offer', { offer, clientId: socket.id });
+  });
 
-    log('Client said (' + room + '): ', message);
+  socket.on('answer', function (data) {
+    log('Received an answer', data);
+    const { answer, clientId } = data;
+    io.to(clientId).emit('answer', { answer });
+  });
 
-    // Emit the message only to clients in the specified room, excluding the sender
-    socket.to(room).emit('message', { room, message });
+  socket.on('ice-candidate', function (data) {
+    log('Received an ice-candidate', data);
+    const { candidate, room } = data;
+    socket.broadcast.to(room).emit('ice-candidate', { candidate, clientId: socket.id });
   });
 
   socket.on('ipaddr', function () {

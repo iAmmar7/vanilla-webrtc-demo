@@ -12,15 +12,7 @@
       class="shadow-md w-full md:w-3/4 border mt-4 mr-auto ml-auto py-2 px-2 md:px-0 transition duration-500 ease-in-out transform"
     >
       <h1 class="text-3xl text-center">WebRTC Room <span id="roomName" class="font-bold"></span></h1>
-      <div class="flex justify-center my-2 gap-4 flex-wrap">
-        <video
-          autoplay
-          playsinline
-          muted
-          id="localVideo"
-          class="border mb-2 rounded-md md:w-[300px] md:h-[300px] bg-black"
-        ></video>
-      </div>
+      <div class="flex justify-center my-2 gap-4 flex-wrap" id="container"></div>
     </main>
 
     <script src="/socket.io/socket.io.js"></script>
