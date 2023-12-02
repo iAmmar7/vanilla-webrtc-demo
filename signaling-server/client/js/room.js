@@ -70,7 +70,6 @@ socket.on('offer', async function (data) {
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
 
-  console.log('send answer', answer);
   socket.emit('answer', { answer, clientId });
 });
 
@@ -80,7 +79,6 @@ socket.on('answer', async (data) => {
 });
 
 socket.on('ice-candidate', function (data) {
-  console.log('on ice-candidate', data);
   peerConnection.addIceCandidate(data.candidate);
 });
 
@@ -141,8 +139,6 @@ async function startPeerConnection(clientId) {
   localStream.getTracks().forEach((track) => {
     peer.addTrack(track, localStream);
   });
-
-  console.log('Local stream added to localPeer connection');
 
   await createOffer(peer);
 
