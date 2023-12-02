@@ -1,20 +1,29 @@
 const os = require('os');
 const express = require('express');
 const { createServer } = require('node:http');
-const { join } = require('node:path');
+const path = require('node:path');
 const { Server } = require('socket.io');
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.use(express.static(join(__dirname, 'client')));
+// Serve static files from the 'client' directory
+app.use(express.static(path.join(__dirname, 'client')));
 
-app.get('/*', (req, res) => {
-  res.sendFile(join(__dirname, '/client/index.html'));
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'client/index.html'));
+});
+
+app.get('/room/*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'client/room.html'));
 });
 
 io.on('connection', function (socket) {
+  // Send current rooms to the newly connected client
+  const rooms = io.sockets.adapter.rooms;
+  socket.emit('rooms', rooms);
+
   // convenience function to log server messages on the client
   function log() {
     const array = [];

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Signaling Server WebRTC Demo</title>
+  </head>
+  <body>
+    <main
+      class="shadow-md w-full md:w-3/4 border mt-4 mr-auto ml-auto py-2 px-2 md:px-0 transition duration-500 ease-in-out transform"
+    >
+      <h1 class="text-3xl text-center">WebRTC Room <span id="roomName" class="font-bold"></span></h1>
+      <div class="flex justify-center my-2 gap-4 flex-wrap">
+        <video
+          autoplay
+          playsinline
+          muted
+          id="localVideo"
+          class="border mb-2 rounded-md md:w-[300px] md:h-[300px] bg-black"
+        ></video>
+      </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/room.js"></script>
+  </body>
+</html>
