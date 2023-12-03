@@ -62,6 +62,11 @@ socket.on('offer', async function (data) {
     console.log('WebRTC connection state changed:', pc.iceConnectionState);
   });
 
+  pc.addEventListener('track', (event) => {
+    const vidElem = createVideoElement();
+    vidElem.srcObject = event.streams[0];
+  });
+
   localStream.getTracks().forEach((track) => {
     pc.addTrack(track, localStream);
   });
@@ -110,6 +115,8 @@ async function startLocalStream() {
     const stream = await navigator.mediaDevices.getUserMedia(constraint);
     const videoElem = createVideoElement();
     videoElem.srcObject = stream;
+    videoElem.classList.add('border-green-500');
+    videoElem.classList.add('border-2');
     localStream = stream;
   } catch (error) {
     console.log('startLocalStream error', error);
@@ -133,7 +140,7 @@ async function startPeerConnection(clientId) {
 
   peer.addEventListener('track', (event) => {
     const vidElem = createVideoElement();
-    vidElem.srcObject = new MediaStream([event.track]);
+    vidElem.srcObject = event.streams[0];
   });
 
   localStream.getTracks().forEach((track) => {
