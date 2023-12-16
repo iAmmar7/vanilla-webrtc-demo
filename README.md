@@ -2,4 +2,4 @@
 
 Basic demos with WebRTC connections.
 
-Demo for signaling-server is deployed with Glitch: https://turquoise-childish-verse.glitch.me/
+Demo for signaling-server is deployed with Glitch: [signaling-server](https://webrtc-signaling-server-demo.glitch.me/)
